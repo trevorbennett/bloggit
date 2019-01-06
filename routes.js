@@ -21,11 +21,23 @@ router.post('/addpost', (req, res) => {
     });
 });
 
-// app.post('likepost', req, res) => {
-//
-//     req.body.body +=  " Created by " + req.body.user + " at " + moment().format('MMMM Do YYYY, h:mm:ss a');
-//     var postData = new Post(req.body);
-// }
+router.post('/likepost', (req, res) => {
+    var body = req.body;
+    Post.findOneAndUpdate({ body: body.body }, {$set:{likes: parseInt(body.likes || 0) + 1}}, {new:true, upsert:true}, (err, doc) => {
+      if(err) {
+        console.log("upvote failed " + err);
+      }
+    }).then( result => {
+      var text = '';
+      for (var key in body) {
+        text += 'Index is: ' + key + '\nDescription is:  ' + body[key] +"\n\n";
+      }
+      console.log("Got a response: ", text);
+        res.redirect('/');
+    }).catch(err => {
+        res.status(400).send("Unable to save data");
+    });
+});
 
 router.get("/", (req, res) => {
    Post.find({}, (err, posts) => {
